@@ -3,14 +3,14 @@
   padding: 5px 10px;
   border-radius: 5px;
   color: var(--accent);
-  background: var(--accent-bg, rgba(255,255,255,0.05));
+  background: var(--accent-bg, rgba(255, 255, 255, 0.05));
   border: 2px solid transparent;
   transition: border-color 0.3s;
   margin-bottom: 24px;
 }
 
 .counter:hover {
-  border-color: var(--accent-border, rgba(255,255,255,0.2));
+  border-color: var(--accent-border, rgba(255, 255, 255, 0.2));
 }
 
 .counter:focus-visible {
@@ -20,7 +20,8 @@
 
 .hero {
   position: relative;
-  min-height: 200px; /* Added: Ensures absolute children don't collapse */
+  min-height: 200px;
+  /* Added: Ensures absolute children don't collapse */
 }
 
 .hero .base,
@@ -71,7 +72,7 @@
   text-align: left;
 }
 
-#next-steps > div {
+#next-steps>div {
   flex: 1 1 0;
   padding: 32px;
 }
@@ -102,7 +103,7 @@
   color: var(--text-h, #ffffff);
   font-size: 16px;
   border-radius: 6px;
-  background: var(--social-bg, rgba(255,255,255,0.05));
+  background: var(--social-bg, rgba(255, 255, 255, 0.05));
   display: flex;
   padding: 6px 12px;
   align-items: center;
@@ -138,6 +139,44 @@
   border: 5px solid transparent;
 }
 
+/* ===================== LAYOUT BEHAVIOR ===================== */
+.layout-sidebar {
+  position: fixed;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  z-index: 150;
+  width: 280px;
+  transition: transform 0.3s ease;
+}
+
+.layout-main {
+  flex: 1;
+  margin-left: 280px;
+  /* Pushes content right of the sidebar on desktop */
+  padding: 2.5rem;
+  transition: all 0.3s ease;
+}
+
+@media (max-width: 768px) {
+  .layout-sidebar {
+    transform: translateX(-100%);
+    /* Hides sidebar off-screen by default on mobile */
+  }
+
+  .layout-sidebar.open {
+    transform: translateX(0);
+    /* Slides it in when state is true */
+  }
+
+  .layout-main {
+    margin-left: 0;
+    padding: 1.25rem;
+    padding-top: 5.5rem;
+    /* Pushes content down so mobile header doesn't cover it */
+  }
+}
+
 .ticks::before {
   left: 0;
   border-left-color: var(--border);
@@ -150,13 +189,15 @@
 
 /* ===================== RESPONSIVENESS ===================== */
 
-.mobile-only { display: none; }
+.mobile-only {
+  display: none;
+}
 
 @media (max-width: 1024px) {
   .container {
     padding: 1.5rem;
   }
-  
+
   .grid-cols-auto {
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 1.25rem;
@@ -172,7 +213,7 @@
     text-align: center;
   }
 
-  #next-steps > div {
+  #next-steps>div {
     padding: 24px 20px;
   }
 
@@ -207,18 +248,23 @@
     --sidebar-width: 0px;
   }
 
-  .mobile-only { display: block; }
-  .desktop-only { display: none; }
+  .mobile-only {
+    display: block;
+  }
+
+  .desktop-only {
+    display: none;
+  }
 
   .page-header {
     flex-direction: column;
     align-items: flex-start;
   }
-  
+
   .page-header h2 {
     font-size: 1.5rem !important;
   }
-  
+
   .page-header .btn {
     width: 100%;
   }
@@ -247,7 +293,7 @@
     gap: 1.5rem !important;
   }
 
-  .pos-page > div:last-child {
+  .pos-page>div:last-child {
     height: 500px !important;
   }
 }
