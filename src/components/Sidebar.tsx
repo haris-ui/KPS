@@ -39,7 +39,7 @@ const Sidebar = () => {
           display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden',
           flexShrink: 0, boxShadow: '0 0 15px rgba(255,255,255,0.1)' 
         }}>
-          <img src="/Logo.png" alt="KPS Logo" style={{ width: '80%', height: '80%', objectFit: 'contain' }} />
+          <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQR6R1ZiuxJXP-tMuvdgKWoZIhPBDqyyWuhHQ&s" alt="KPS Logo" style={{ width: '80%', height: '80%', objectFit: 'contain' }} />
         </div>
         <div>
           <h1 className="gradient-text" style={{ fontSize: '1.2rem', letterSpacing: '-0.02em', lineHeight: 1.1, whiteSpace: 'nowrap' }}>Kashif Poultry Shop</h1>

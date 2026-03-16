@@ -52,7 +52,7 @@ const LoginPage = () => {
             transform: 'rotate(5deg)',
             overflow: 'hidden'
           }} className="animate-float">
-            <img src="/Logo.png" alt="Kashif Poultry Shop Logo" style={{ width: '80%', height: '80%', objectFit: 'contain' }} />
+            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQR6R1ZiuxJXP-tMuvdgKWoZIhPBDqyyWuhHQ&s" alt="Kashif Poultry Shop Logo" style={{ width: '80%', height: '80%', objectFit: 'contain' }} />
           </div>
           <h1 className="gradient-text animate-typewriter" style={{ fontSize: '2rem', margin: '0 auto', whiteSpace: 'nowrap' }}>Kashif Poultry Shop</h1>
           <p style={{ color: 'var(--text-muted)', fontSize: '0.7rem', letterSpacing: '0.2em', textTransform: 'uppercase', marginTop: '0.75rem' }}>Premium Quality Management</p>
