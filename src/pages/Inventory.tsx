@@ -33,9 +33,9 @@ const InventoryPage = () => {
       await fetchProducts()
       setShowAddModal(false)
       setNewProduct({ name: '', category: 'Poultry', buy_price: 0, sell_price: 0, unit: 'KG', stock: 0 })
-    } catch (error) {
+    } catch (error: any) {
       console.error('Adding product failed:', error)
-      alert('Failed to add product')
+      alert(`Failed to add product: ${error.message || 'Unknown error'}`)
     } finally {
       setUpdatingId(null)
     }

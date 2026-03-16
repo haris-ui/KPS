@@ -31,9 +31,9 @@ const ClientsPage = () => {
       await fetchClients()
       setShowAddModal(false)
       setNewClient({ name: '', contact: '', balance: 0, credit_limit: 50000 })
-    } catch (error) {
+    } catch (error: any) {
       console.error('Adding client failed:', error)
-      alert('Failed to add client')
+      alert(`Failed to add client: ${error.message || 'Unknown error'}`)
     } finally {
       setIsAdding(false)
     }

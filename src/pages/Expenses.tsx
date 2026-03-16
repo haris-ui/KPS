@@ -37,9 +37,9 @@ const ExpensesPage = () => {
         note: '',
         has_receipt: false
       })
-    } catch (error) {
+    } catch (error: any) {
       console.error('Adding expense failed:', error)
-      alert('Failed to log expense')
+      alert(`Failed to log expense: ${error.message || 'Unknown error'}`)
     } finally {
       setIsAdding(false)
     }
