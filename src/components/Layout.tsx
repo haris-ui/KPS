@@ -10,45 +10,39 @@ const Layout = ({ children }: LayoutProps) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', position: 'relative' }}>
-      
+    <div className="layout-root">
       {/* Mobile Header */}
-      <div className="mobile-only glass" style={{
-        position: 'fixed', top: 0, left: 0, right: 0, height: '64px', zIndex: 100
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', height: '100%', padding: '0 1.25rem', justifyContent: 'space-between' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQR6R1ZiuxJXP-tMuvdgKWoZIhPBDqyyWuhHQ&s" alt="Logo" style={{ width: '32px', height: '32px', borderRadius: '6px' }} />
-            <h2 style={{ fontSize: '1.1rem', fontWeight: 700 }}>Kashif Poultry</h2>
-          </div>
-          <button 
-            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-            style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer', padding: '0.25rem' }}
-          >
-            {isSidebarOpen ? <X size={26} /> : <Menu size={26} />}
-          </button>
+      <div className="mobile-header">
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQR6R1ZiuxJXP-tMuvdgKWoZIhPBDqyyWuhHQ&s" alt="Logo" style={{ width: '32px', height: '32px', borderRadius: '2px' }} />
+          <h2 style={{ fontSize: '1rem', fontWeight: 800, letterSpacing: '-0.02em', textTransform: 'uppercase' }}>Kashif Poultry</h2>
         </div>
+        <button 
+          onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+          className="btn-ghost"
+          style={{ padding: '0.4rem', border: 'none' }}
+        >
+          {isSidebarOpen ? <X size={24} /> : <Menu size={24} />}
+        </button>
       </div>
 
       {/* Mobile Overlay */}
       {isSidebarOpen && (
         <div 
-          className="mobile-only"
           onClick={() => setIsSidebarOpen(false)}
-          style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)', zIndex: 140 }}
+          style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', zIndex: 140 }}
         />
       )}
 
-      {/* Sidebar Container uses CSS for positioning! */}
+      {/* Sidebar Container */}
       <div className={`layout-sidebar ${isSidebarOpen ? 'open' : ''}`}>
         <Sidebar onClose={() => setIsSidebarOpen(false)} />
       </div>
 
-      {/* Main Content uses CSS for margins! */}
+      {/* Main Content */}
       <main className="layout-main">
         {children}
       </main>
-
     </div>
   )
 }

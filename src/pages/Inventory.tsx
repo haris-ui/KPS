@@ -82,73 +82,73 @@ const InventoryPage = () => {
   }
 
   return (
-    <div className="inventory-page">
+    <div className="animate-fade">
       <div className="page-header">
-        <h2>Inventory Management</h2>
+        <h2>INVENTORY SYSTEM</h2>
         <button className="btn btn-primary" onClick={() => setShowAddModal(true)}>
-          <Plus size={20} />
+          <Plus size={18} />
           ADD PRODUCT
         </button>
       </div>
 
-      <div className="grid-cols-auto" style={{ marginBottom: '2.5rem' }}>
-        <div className="glass-card" style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
-          <div style={{ padding: '0.875rem', background: 'rgba(255,255,255,0.05)', borderRadius: '1rem', color: 'var(--primary)' }} className="animate-float">
+      <div className="grid" style={{ marginBottom: '3rem' }}>
+        <div className="card" style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', borderColor: 'var(--border-highlight)' }}>
+          <div style={{ padding: '1rem', background: 'var(--bg-subtle)', borderRadius: '2px', color: 'var(--accent)' }}>
             <TrendingUp size={24} />
           </div>
           <div>
-            <p style={{ color: 'var(--text-muted)', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Valuation (Cost)</p>
-            <h4 style={{ fontSize: '1.5rem', fontWeight: 800 }}>Rs. {stockValue.toLocaleString()}</h4>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '0.15em', fontWeight: 700 }}>Stock Valuation</p>
+            <h4 style={{ fontSize: '1.75rem', fontWeight: 800 }}>Rs. {stockValue.toLocaleString()}</h4>
           </div>
         </div>
-        <div className="glass-card" style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
-          <div style={{ padding: '0.875rem', background: lowStockCount > 0 ? 'rgba(255, 77, 77, 0.1)' : 'rgba(255,255,255,0.05)', borderRadius: '1rem', color: lowStockCount > 0 ? 'var(--error)' : 'var(--text-muted)' }}>
+        <div className="card" style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', borderColor: lowStockCount > 0 ? 'var(--error)' : 'var(--border-highlight)' }}>
+          <div style={{ padding: '1rem', background: lowStockCount > 0 ? 'rgba(255, 59, 48, 0.1)' : 'var(--bg-subtle)', borderRadius: '2px', color: lowStockCount > 0 ? 'var(--error)' : 'var(--text-muted)' }}>
             <AlertCircle size={24} />
           </div>
           <div>
-            <p style={{ color: 'var(--text-muted)', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Stock Alerts</p>
-            <h4 style={{ fontSize: '1.5rem', fontWeight: 800, color: lowStockCount > 0 ? 'var(--error)' : 'inherit' }}>{lowStockCount} Critical</h4>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '0.15em', fontWeight: 700 }}>Alert Status</p>
+            <h4 style={{ fontSize: '1.75rem', fontWeight: 800, color: lowStockCount > 0 ? 'var(--error)' : 'inherit' }}>{lowStockCount} LOW STOCK</h4>
           </div>
         </div>
       </div>
 
-      <div className="glass" style={{ borderRadius: '1.25rem', overflow: 'hidden', border: '1px solid var(--border)' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-          <thead style={{ background: 'var(--surface)', color: 'var(--text-muted)', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+      <div className="table-container card" style={{ padding: 0 }}>
+        <table>
+          <thead>
             <tr>
-              <th style={{ padding: '1.25rem 1.5rem' }}>PRODUCT IDENTIFIER</th>
-              <th style={{ padding: '1.25rem 1.5rem' }}>CATEGORY</th>
-              <th style={{ padding: '1.25rem 1.5rem' }}>BUY RATE</th>
-              <th style={{ padding: '1.25rem 1.5rem' }}>SELL RATE</th>
-              <th style={{ padding: '1.25rem 1.5rem' }}>QUANTITY</th>
-              <th style={{ padding: '1.25rem 1.5rem' }}>MARGIN</th>
-              <th style={{ padding: '1.25rem 1.5rem' }}>OPERATIONS</th>
+              <th>ID / NAME</th>
+              <th>CATEGORY</th>
+              <th>COST RATE</th>
+              <th>SALE RATE</th>
+              <th>STOCK LEVEL</th>
+              <th>PROFIT %</th>
+              <th>ACTIONS</th>
             </tr>
           </thead>
           <tbody>
             {isLoading && products.length === 0 ? (
               <tr>
-                <td colSpan={7} style={{ padding: '3rem', textAlign: 'center' }}>
+                <td colSpan={7} style={{ padding: '4rem', textAlign: 'center' }}>
                   <Loader2 className="animate-spin" style={{ margin: '0 auto' }} />
-                  <p style={{ marginTop: '1rem', color: 'var(--text-muted)', fontSize: '0.8rem' }}>FETCHING INVENTORY...</p>
+                  <p style={{ marginTop: '1rem', color: 'var(--text-muted)', fontSize: '0.75rem', letterSpacing: '0.1em' }}>SYNCING DATABASE...</p>
                 </td>
               </tr>
             ) : products.length === 0 ? (
               <tr>
-                <td colSpan={7} style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-muted)' }}>
-                  No products found in database.
+                <td colSpan={7} style={{ padding: '4rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+                  NO INVENTORY DATA FOUND
                 </td>
               </tr>
             ) : products.map((product) => (
-              <tr key={product.id} style={{ borderTop: '1px solid var(--border)', background: 'transparent', opacity: updatingId === product.id ? 0.5 : 1 }}>
-                <td style={{ padding: '1.25rem 1.5rem', fontWeight: 600 }}>{product.name}</td>
-                <td style={{ padding: '1.25rem 1.5rem' }}>
-                  <span style={{ padding: '0.35rem 0.75rem', background: 'rgba(255,255,255,0.05)', borderRadius: '0.5rem', fontSize: '0.7rem', fontWeight: 700 }}>
+              <tr key={product.id} className="animate-slide" style={{ opacity: updatingId === product.id ? 0.5 : 1 }}>
+                <td style={{ fontWeight: 700 }}>{product.name}</td>
+                <td>
+                  <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', textTransform: 'uppercase', fontWeight: 800 }}>
                     {product.category}
                   </span>
                 </td>
-                <td style={{ padding: '1.25rem 1.5rem', color: 'var(--text-muted)', fontSize: '0.9rem' }}>Rs. {product.buy_price}</td>
-                <td style={{ padding: '1.25rem 1.5rem' }}>
+                <td style={{ color: 'var(--text-muted)' }}>Rs. {product.buy_price.toLocaleString()}</td>
+                <td>
                   {editingId === product.id ? (
                     <input 
                       type="number" 
@@ -156,47 +156,35 @@ const InventoryPage = () => {
                       onBlur={(e) => handlePriceChange(product.id, Number(e.target.value))}
                       onKeyDown={(e) => e.key === 'Enter' && handlePriceChange(product.id, Number(e.currentTarget.value))}
                       autoFocus
-                      disabled={updatingId === product.id}
-                      style={{ 
-                        width: '100px', background: 'var(--background)', border: '1px solid rgba(255,255,255,0.3)', 
-                        color: 'white', padding: '0.4rem 0.6rem', borderRadius: '0.5rem', outline: 'none'
-                      }}
+                      className="input"
+                      style={{ width: '120px', padding: '0.4rem' }}
                     />
                   ) : (
-                    <span style={{ color: 'var(--primary)', fontWeight: 700, fontSize: '1rem' }}>Rs. {product.sell_price}</span>
+                    <span style={{ fontWeight: 800 }}>Rs. {product.sell_price.toLocaleString()}</span>
                   )}
                 </td>
-                <td style={{ padding: '1.25rem 1.5rem' }}>
+                <td>
                   <span style={{ 
-                    padding: '0.25rem 0.6rem',
-                    borderRadius: '0.4rem',
-                    background: product.stock < 20 ? 'rgba(255, 77, 77, 0.1)' : 'transparent',
-                    color: product.stock < 20 ? 'var(--error)' : 'inherit',
-                    fontWeight: product.stock < 20 ? 700 : 400
+                    padding: '0.35rem 0.6rem',
+                    borderRadius: '2px',
+                    background: product.stock < 20 ? 'rgba(255, 59, 48, 0.1)' : 'var(--bg-subtle)',
+                    color: product.stock < 20 ? 'var(--error)' : 'var(--text-primary)',
+                    fontWeight: product.stock < 20 ? 800 : 600,
+                    fontSize: '0.75rem'
                   }}>
                     {product.stock} {product.unit}
                   </span>
                 </td>
-                <td style={{ padding: '1.25rem 1.5rem', fontWeight: 600, color: 'var(--success)' }}>
+                <td style={{ fontWeight: 700, color: 'var(--success)' }}>
                   +{(((product.sell_price - product.buy_price) / product.sell_price) * 100).toFixed(1)}%
                 </td>
-                <td style={{ padding: '1.25rem 1.5rem' }}>
-                  <div style={{ display: 'flex', gap: '0.5rem' }}>
-                    <button 
-                      className="btn-ghost" 
-                      style={{ padding: '0.5rem', border: 'none' }} 
-                      onClick={() => setEditingId(product.id)}
-                      disabled={updatingId === product.id}
-                    >
-                      <Edit3 size={18} />
+                <td>
+                  <div style={{ display: 'flex', gap: '0.25rem' }}>
+                    <button className="btn-ghost" style={{ padding: '0.5rem', border: 'none' }} onClick={() => setEditingId(product.id)}>
+                      <Edit3 size={16} />
                     </button>
-                    <button 
-                      className="btn-ghost" 
-                      style={{ padding: '0.5rem', border: 'none', color: 'var(--error)' }}
-                      onClick={() => handleDelete(product.id)}
-                      disabled={updatingId === product.id}
-                    >
-                      <Trash2 size={18} />
+                    <button className="btn-ghost" style={{ padding: '0.5rem', border: 'none', color: 'var(--error)' }} onClick={() => handleDelete(product.id)}>
+                      <Trash2 size={16} />
                     </button>
                   </div>
                 </td>
@@ -206,38 +194,36 @@ const InventoryPage = () => {
         </table>
       </div>
 
-    {showAddModal && (
+      {showAddModal && (
         <div style={{ 
-          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', zIndex: 1000,
-          display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(10px)'
+          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.9)', zIndex: 1000,
+          display: 'flex', alignItems: 'center', justifyContent: 'center'
         }}>
-          <div className="glass-card" style={{ width: '100%', maxWidth: '450px', position: 'relative', animation: 'scaleIn 0.3s ease' }}>
-            <button 
-              onClick={() => setShowAddModal(false)}
-              style={{ position: 'absolute', right: '1.5rem', top: '1.5rem', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}
-            >
-              <X size={24} />
+          <div className="card animate-slide" style={{ width: '100%', maxWidth: '480px', position: 'relative', background: 'var(--bg-surface)' }}>
+            <button onClick={() => setShowAddModal(false)} style={{ position: 'absolute', right: '1.5rem', top: '1.5rem', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}>
+              <X size={20} />
             </button>
-            <h3 style={{ marginBottom: '2rem', fontSize: '1.5rem' }}>Add New Product</h3>
+            <h3 style={{ marginBottom: '2.5rem', fontSize: '1.25rem', fontWeight: 800 }}>NEW PRODUCT ENTRY</h3>
             
-            <form onSubmit={handleAddProduct} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+            <form onSubmit={handleAddProduct} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
               <div>
-                <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.5rem', textTransform: 'uppercase' }}>Product Name</label>
+                <label style={{ display: 'block', fontSize: '0.65rem', color: 'var(--text-secondary)', marginBottom: '0.5rem', textTransform: 'uppercase', fontWeight: 700 }}>Full Name</label>
                 <input 
                   type="text" required
                   value={newProduct.name}
                   onChange={e => setNewProduct({...newProduct, name: e.target.value})}
-                  style={{ width: '100%', background: 'var(--surface)', border: '1px solid var(--border)', color: 'white', padding: '0.75rem', borderRadius: '0.75rem' }}
+                  className="input"
                 />
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.5rem', textTransform: 'uppercase' }}>Category</label>
+                  <label style={{ display: 'block', fontSize: '0.65rem', color: 'var(--text-secondary)', marginBottom: '0.5rem', textTransform: 'uppercase', fontWeight: 700 }}>Category</label>
                   <select 
                     value={newProduct.category}
                     onChange={e => setNewProduct({...newProduct, category: e.target.value})}
-                    style={{ width: '100%', background: 'var(--surface)', border: '1px solid var(--border)', color: 'white', padding: '0.75rem', borderRadius: '0.75rem' }}
+                    className="input"
+                    style={{ appearance: 'none' }}
                   >
                     <option>Poultry</option>
                     <option>Supplies</option>
@@ -246,56 +232,36 @@ const InventoryPage = () => {
                   </select>
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.5rem', textTransform: 'uppercase' }}>Unit</label>
+                  <label style={{ display: 'block', fontSize: '0.65rem', color: 'var(--text-secondary)', marginBottom: '0.5rem', textTransform: 'uppercase', fontWeight: 700 }}>Unit</label>
                   <select 
                     value={newProduct.unit}
                     onChange={e => setNewProduct({...newProduct, unit: e.target.value as 'KG' | 'Piece'})}
-                    style={{ width: '100%', background: 'var(--surface)', border: '1px solid var(--border)', color: 'white', padding: '0.75rem', borderRadius: '0.75rem' }}
+                    className="input"
                   >
-                    <option value="KG">Kilogram (KG)</option>
-                    <option value="Piece">Piece</option>
+                    <option value="KG">KG</option>
+                    <option value="Piece">PIECE</option>
                   </select>
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.5rem', textTransform: 'uppercase' }}>Buy Price (Rs.)</label>
-                  <input 
-                    type="number" required min="0"
-                    value={newProduct.buy_price}
-                    onChange={e => setNewProduct({...newProduct, buy_price: Number(e.target.value)})}
-                    style={{ width: '100%', background: 'var(--surface)', border: '1px solid var(--border)', color: 'white', padding: '0.75rem', borderRadius: '0.75rem' }}
-                  />
+                  <label style={{ display: 'block', fontSize: '0.65rem', color: 'var(--text-secondary)', marginBottom: '0.5rem', textTransform: 'uppercase', fontWeight: 700 }}>Cost Rate</label>
+                  <input type="number" required min="0" value={newProduct.buy_price} onChange={e => setNewProduct({...newProduct, buy_price: Number(e.target.value)})} className="input" />
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.5rem', textTransform: 'uppercase' }}>Sell Price (Rs.)</label>
-                  <input 
-                    type="number" required min="0"
-                    value={newProduct.sell_price}
-                    onChange={e => setNewProduct({...newProduct, sell_price: Number(e.target.value)})}
-                    style={{ width: '100%', background: 'var(--surface)', border: '1px solid var(--border)', color: 'white', padding: '0.75rem', borderRadius: '0.75rem' }}
-                  />
+                  <label style={{ display: 'block', fontSize: '0.65rem', color: 'var(--text-secondary)', marginBottom: '0.5rem', textTransform: 'uppercase', fontWeight: 700 }}>Sale Rate</label>
+                  <input type="number" required min="0" value={newProduct.sell_price} onChange={e => setNewProduct({...newProduct, sell_price: Number(e.target.value)})} className="input" />
                 </div>
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.5rem', textTransform: 'uppercase' }}>Initial Stock</label>
-                <input 
-                  type="number" required min="0"
-                  value={newProduct.stock}
-                  onChange={e => setNewProduct({...newProduct, stock: Number(e.target.value)})}
-                  style={{ width: '100%', background: 'var(--surface)', border: '1px solid var(--border)', color: 'white', padding: '0.75rem', borderRadius: '0.75rem' }}
-                />
+                <label style={{ display: 'block', fontSize: '0.65rem', color: 'var(--text-secondary)', marginBottom: '0.5rem', textTransform: 'uppercase', fontWeight: 700 }}>Opening Stock</label>
+                <input type="number" required min="0" value={newProduct.stock} onChange={e => setNewProduct({...newProduct, stock: Number(e.target.value)})} className="input" />
               </div>
 
-              <button 
-                type="submit" 
-                className="btn btn-primary" 
-                disabled={updatingId === 'adding'}
-                style={{ height: '3.5rem', marginTop: '1rem' }}
-              >
-                {updatingId === 'adding' ? <Loader2 className="animate-spin" /> : 'REGISTER PRODUCT'}
+              <button type="submit" className="btn btn-primary" style={{ height: '4rem', marginTop: '1rem' }}>
+                {updatingId === 'adding' ? <Loader2 className="animate-spin" /> : 'REGISTER INVENTORY'}
               </button>
             </form>
           </div>
