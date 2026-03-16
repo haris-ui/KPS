@@ -1,21 +1,15 @@
-import { useState } from 'react'
-import { Plus, Search, TrendingDown, TrendingUp, History, Wallet } from 'lucide-react'
-
-interface Client {
-  id: string;
-  name: string;
-  contact: string;
-  balance: number;
-  limit: number;
-}
+import { useState, useEffect } from 'react'
+import { useStore } from '../store/useStore'
+import { Plus, Search, TrendingDown, TrendingUp, History, Wallet, Loader2 } from 'lucide-react'
 
 const ClientsPage = () => {
+  const { clients, fetchClients, isLoading } = useStore()
   const [searchTerm, setSearchTerm] = useState('')
-  const [clients] = useState<Client[]>([
-    { id: '1', name: 'Grand Royal Hotel', contact: '0123456789', balance: -25400, limit: 50000 },
-    { id: '2', name: 'Paradise Restaurant', contact: '9876543210', balance: 8200, limit: 30000 },
-    { id: '3', name: 'City Diner', contact: '5551234567', balance: -4850, limit: 15000 },
-  ])
+
+  useEffect(() => {
+    fetchClients()
+  }, [])
+
   const totalReceivables = clients.reduce((acc, c) => acc + (c.balance < 0 ? Math.abs(c.balance) : 0), 0)
   const totalCredits = clients.reduce((acc, c) => acc + (c.balance > 0 ? c.balance : 0), 0)
 
@@ -72,8 +66,18 @@ const ClientsPage = () => {
       </div>
 
       <div className="grid-cols-auto">
-        {filteredClients.map(client => (
-          <div key={client.id} className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+        {isLoading && clients.length === 0 ? (
+          <div className="glass-card" style={{ gridColumn: '1 / -1', padding: '4rem', textAlign: 'center' }}>
+            <Loader2 className="animate-spin" style={{ margin: '0 auto' }} size={32} />
+            <p style={{ marginTop: '1rem', color: 'var(--text-muted)', fontSize: '0.8rem', letterSpacing: '0.1em' }}>SYNCHRONIZING CLIENT DATA...</p>
+          </div>
+        ) : filteredClients.length === 0 ? (
+          <div className="glass-card" style={{ gridColumn: '1 / -1', padding: '4rem', textAlign: 'center' }}>
+            <Search style={{ margin: '0 auto', opacity: 0.2 }} size={48} />
+            <p style={{ marginTop: '1rem', color: 'var(--text-muted)' }}>No clients found matching your search.</p>
+          </div>
+        ) : filteredClients.map(client => (
+          <div key={client.id} className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', opacity: isLoading ? 0.7 : 1 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
               <div>
                 <h4 style={{ fontSize: '1.25rem', fontWeight: 700 }}>{client.name}</h4>
@@ -96,20 +100,20 @@ const ClientsPage = () => {
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', color: 'var(--text-muted)', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                 <span>Credit Utilization</span>
-                <span>{Math.round(Math.min(100, (Math.abs(client.balance) / client.limit) * 100))}%</span>
+                <span>{Math.round(Math.min(100, (Math.abs(client.balance) / client.credit_limit) * 100))}%</span>
               </div>
               <div style={{ height: '6px', background: 'var(--surface)', borderRadius: '3px', overflow: 'hidden' }}>
                 <div style={{ 
                   height: '100%', 
-                  width: `${Math.min(100, (Math.abs(client.balance) / client.limit) * 100)}%`,
-                  background: Math.abs(client.balance) > client.limit * 0.8 ? 'var(--error)' : '#ffffff',
-                  boxShadow: Math.abs(client.balance) > client.limit * 0.8 ? '0 0 10px rgba(255,77,77,0.3)' : '0 0 10px rgba(255,255,255,0.2)'
+                  width: `${Math.min(100, (Math.abs(client.balance) / client.credit_limit) * 100)}%`,
+                  background: Math.abs(client.balance) > client.credit_limit * 0.8 ? 'var(--error)' : '#ffffff',
+                  boxShadow: Math.abs(client.balance) > client.credit_limit * 0.8 ? '0 0 10px rgba(255,77,77,0.3)' : '0 0 10px rgba(255,255,255,0.2)'
                 }} />
               </div>
             </div>
 
             <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textAlign: 'right', fontWeight: 500 }}>
-              LIMIT: Rs. {client.limit.toLocaleString()}
+              LIMIT: Rs. {client.credit_limit.toLocaleString()}
             </p>
 
             <div style={{ display: 'flex', gap: '0.75rem' }}>

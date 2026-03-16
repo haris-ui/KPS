@@ -1,17 +1,47 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { useStore } from '../store/useStore'
-import { LogIn } from 'lucide-react'
+import { supabase } from '../lib/supabase'
+import { LogIn, Loader2, AlertCircle } from 'lucide-react'
 
 const LoginPage = () => {
   const { setUser } = useStore()
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [error, setError] = useState<string | null>(null)
+  const [loading, setLoading] = useState(false)
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
-    setUser({
-      id: '1',
-      name: 'Admin User',
-      role: 'admin'
-    })
+    setError(null)
+    setLoading(true)
+
+    try {
+      const { data, error: authError } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      })
+
+      if (authError) throw authError
+
+      if (data.user) {
+        // Fetch profile to get name and role
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', data.user.id)
+          .single()
+
+        setUser({
+          id: data.user.id,
+          name: profile?.name || data.user.email?.split('@')[0] || 'User',
+          role: profile?.role || 'staff'
+        })
+      }
+    } catch (err: any) {
+      setError(err.message || 'Failed to establish connection')
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -58,26 +88,26 @@ const LoginPage = () => {
           <p style={{ color: 'var(--text-muted)', fontSize: '0.7rem', letterSpacing: '0.2em', textTransform: 'uppercase', marginTop: '0.75rem' }}>Premium Quality Management</p>
         </div>
 
-        <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-          <div style={{ textAlign: 'left' }}>
-            <label style={{ display: 'block', fontSize: '0.7rem', marginBottom: '0.5rem', color: 'var(--text-muted)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Administrator Access</label>
-            <div 
-              style={{
-                width: '100%', padding: '1rem', borderRadius: '1rem', 
-                border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.05)', 
-                color: 'white', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.5rem'
-              }}
-            >
-              <div style={{ width: '8px', height: '8px', background: 'var(--success)', borderRadius: '50%' }} />
-              SUPER USER PORTAL
+        <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+          {error && (
+            <div style={{ 
+              padding: '0.75rem', borderRadius: '0.75rem', 
+              background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.2)',
+              color: 'var(--error)', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.5rem'
+            }}>
+              <AlertCircle size={16} />
+              {error}
             </div>
-          </div>
+          )}
 
           <div style={{ textAlign: 'left' }}>
-            <label style={{ display: 'block', fontSize: '0.7rem', marginBottom: '0.5rem', color: 'var(--text-muted)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Security Key</label>
+            <label style={{ display: 'block', fontSize: '0.7rem', marginBottom: '0.5rem', color: 'var(--text-muted)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Access Email</label>
             <input 
-              type="password" 
-              placeholder="••••••••"
+              type="email" 
+              placeholder="admin@kps.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
               className="glass"
               style={{
                 width: '100%', padding: '1rem', borderRadius: '1rem', 
@@ -88,9 +118,32 @@ const LoginPage = () => {
             />
           </div>
 
-          <button type="submit" className="btn btn-primary" style={{ marginTop: '1rem', padding: '1rem', fontSize: '1rem', letterSpacing: '0.1em' }}>
-            <LogIn size={20} />
-            ESTABLISH CONNECTION
+          <div style={{ textAlign: 'left' }}>
+            <label style={{ display: 'block', fontSize: '0.7rem', marginBottom: '0.5rem', color: 'var(--text-muted)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Security Key</label>
+            <input 
+              type="password" 
+              placeholder="••••••••"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              className="glass"
+              style={{
+                width: '100%', padding: '1rem', borderRadius: '1rem', 
+                border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.05)', 
+                color: 'white', outline: 'none',
+                fontSize: '0.9rem'
+              }}
+            />
+          </div>
+
+          <button 
+            type="submit" 
+            className="btn btn-primary" 
+            disabled={loading}
+            style={{ marginTop: '0.5rem', padding: '1rem', fontSize: '1rem', letterSpacing: '0.1em', opacity: loading ? 0.7 : 1 }}
+          >
+            {loading ? <Loader2 size={20} className="animate-spin" /> : <LogIn size={20} />}
+            {loading ? 'AUTHENTICATING...' : 'ESTABLISH CONNECTION'}
           </button>
         </form>
 

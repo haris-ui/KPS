@@ -1,13 +1,19 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useStore } from '../store/useStore'
-import { Search, ShoppingBag, Trash2, Banknote, Plus, Minus, X } from 'lucide-react'
+import { supabase } from '../lib/supabase'
+import { Search, ShoppingBag, Trash2, Banknote, Plus, Minus, X, Loader2 } from 'lucide-react'
 
 const POSPage = () => {
-  const { products, cart, addToCart, removeFromCart, clearCart } = useStore()
+  const { products, cart, addToCart, removeFromCart, clearCart, fetchProducts } = useStore()
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedProduct, setSelectedProduct] = useState<any>(null)
   const [weight, setWeight] = useState(1)
   const [processingCharge, setProcessingCharge] = useState(0)
+  const [isProcessing, setIsProcessing] = useState(false)
+
+  useEffect(() => {
+    fetchProducts()
+  }, [])
 
   const filteredProducts = products.filter(p => 
     p.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -26,6 +32,54 @@ const POSPage = () => {
     return cart.reduce((acc, item) => 
       acc + (item.product.sell_price * item.quantity) + item.processing_charge, 0
     )
+  }
+
+  const handleProcessPayment = async () => {
+    if (cart.length === 0) return
+    setIsProcessing(true)
+
+    try {
+      // 1. Create Sale Record
+      const { data: sale, error: saleError } = await supabase
+        .from('sales')
+        .insert({
+          total_amount: calculateTotal(),
+          payment_method: 'cash' // Defaulting for now
+        })
+        .select()
+        .single()
+
+      if (saleError) throw saleError
+
+      // 2. Create Sale Items & Update Stock
+      for (const item of cart) {
+        // Log item
+        await supabase.from('sale_items').insert({
+          sale_id: sale.id,
+          product_id: item.product.id,
+          quantity: item.quantity,
+          unit_price: item.product.sell_price,
+          subtotal: (item.product.sell_price * item.quantity) + item.processing_charge
+        })
+
+        // Update stock
+        const { error: stockError } = await supabase
+          .from('products')
+          .update({ stock: item.product.stock - item.quantity })
+          .eq('id', item.product.id)
+
+        if (stockError) throw stockError
+      }
+
+      alert('Transaction Completed Successfully!')
+      clearCart()
+      await fetchProducts()
+    } catch (error: any) {
+      console.error('Payment failed:', error)
+      alert(`Payment Processing Failed: ${error.message}`)
+    } finally {
+      setIsProcessing(false)
+    }
   }
 
   return (
@@ -151,9 +205,14 @@ const POSPage = () => {
             <span className="gradient-text">Rs. {calculateTotal().toFixed(2)}</span>
           </div>
 
-          <button className="btn btn-primary" style={{ width: '100%', padding: '1.25rem', fontSize: '1rem', letterSpacing: '0.1em' }} disabled={cart.length === 0}>
-            <Banknote size={20} />
-            PROCESS PAYMENT
+          <button 
+            className="btn btn-primary" 
+            style={{ width: '100%', padding: '1.25rem', fontSize: '1rem', letterSpacing: '0.1em', opacity: isProcessing ? 0.7 : 1 }} 
+            disabled={cart.length === 0 || isProcessing}
+            onClick={handleProcessPayment}
+          >
+            {isProcessing ? <Loader2 className="animate-spin" size={20} /> : <Banknote size={20} />}
+            {isProcessing ? 'PROCESSING...' : 'PROCESS PAYMENT'}
           </button>
         </div>
       </div>

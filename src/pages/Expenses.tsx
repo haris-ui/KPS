@@ -1,21 +1,14 @@
-import { useState } from 'react'
-import { Plus, Receipt, Banknote, Tag, Calendar, Camera, Edit3 } from 'lucide-react'
-
-interface Expense {
-  id: string;
-  category: string;
-  amount: number;
-  date: string;
-  note: string;
-  hasReceipt: boolean;
-}
+import { useEffect } from 'react'
+import { useStore } from '../store/useStore'
+import { Plus, Receipt, Banknote, Tag, Calendar, Camera, Edit3, Loader2 } from 'lucide-react'
 
 const ExpensesPage = () => {
-  const [expenses] = useState<Expense[]>([
-    { id: '1', category: 'Electricity', amount: 4500, date: '2026-03-14', note: 'Monthly bill', hasReceipt: true },
-    { id: '2', category: 'Labor', amount: 28000, date: '2026-03-15', note: 'Weekly wages', hasReceipt: false },
-    { id: '3', category: 'Transport', amount: 2800, date: '2026-03-16', note: 'Diesel for delivery van', hasReceipt: true },
-  ])
+  const { expenses, fetchExpenses, isLoading } = useStore()
+
+  useEffect(() => {
+    fetchExpenses()
+  }, [])
+
   const totalExpenses = expenses.reduce((acc, e) => acc + e.amount, 0)
 
   return (
@@ -44,7 +37,7 @@ const ExpensesPage = () => {
           </div>
           <div>
             <p style={{ color: 'var(--text-muted)', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Receipt Retention</p>
-            <h4 style={{ fontSize: '1.5rem', fontWeight: 800 }}>{expenses.filter(e => e.hasReceipt).length} Records</h4>
+            <h4 style={{ fontSize: '1.5rem', fontWeight: 800 }}>{expenses.filter(e => e.has_receipt).length} Records</h4>
           </div>
         </div>
       </div>
@@ -62,7 +55,20 @@ const ExpensesPage = () => {
             </tr>
           </thead>
           <tbody>
-            {expenses.map((expense) => (
+            {isLoading && expenses.length === 0 ? (
+              <tr>
+                <td colSpan={6} style={{ padding: '3rem', textAlign: 'center' }}>
+                  <Loader2 className="animate-spin" style={{ margin: '0 auto' }} />
+                  <p style={{ marginTop: '1rem', color: 'var(--text-muted)' }}>RETRIEVING RECORDS...</p>
+                </td>
+              </tr>
+            ) : expenses.length === 0 ? (
+              <tr>
+                <td colSpan={6} style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+                  No outflow records found.
+                </td>
+              </tr>
+            ) : expenses.map((expense) => (
               <tr key={expense.id} style={{ borderTop: '1px solid var(--border)', background: 'transparent' }}>
                 <td style={{ padding: '1.25rem 1.5rem' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', fontWeight: 500 }}>
@@ -83,7 +89,7 @@ const ExpensesPage = () => {
                   − Rs. {expense.amount.toLocaleString()}
                 </td>
                 <td style={{ padding: '1.25rem 1.5rem' }}>
-                  {expense.hasReceipt ? (
+                  {expense.has_receipt ? (
                     <button className="btn-ghost" style={{ padding: '0.4rem 0.75rem', fontSize: '0.7rem', borderRadius: '0.5rem', fontWeight: 700 }}>
                       <Camera size={14} />
                       PREVIEW

@@ -1,16 +1,55 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useStore } from '../store/useStore'
-import { Edit3, Trash2, TrendingUp, AlertCircle, Plus } from 'lucide-react'
+import { supabase } from '../lib/supabase'
+import { Edit3, Trash2, TrendingUp, AlertCircle, Plus, Loader2 } from 'lucide-react'
 
 const InventoryPage = () => {
-  const { products, setProducts } = useStore()
+  const { products, fetchProducts, isLoading } = useStore()
   const [editingId, setEditingId] = useState<string | null>(null)
+  const [updatingId, setUpdatingId] = useState<string | null>(null)
+
+  useEffect(() => {
+    fetchProducts()
+  }, [])
+
   const stockValue = products.reduce((acc, p) => acc + p.buy_price * p.stock, 0)
   const lowStockCount = products.filter(p => p.stock < 20).length
 
-  const handlePriceChange = (id: string, newPrice: number) => {
-    setProducts(products.map(p => p.id === id ? { ...p, sell_price: newPrice } : p))
-    setEditingId(null)
+  const handlePriceChange = async (id: string, newPrice: number) => {
+    setUpdatingId(id)
+    try {
+      const { error } = await supabase
+        .from('products')
+        .update({ sell_price: newPrice })
+        .eq('id', id)
+      
+      if (error) throw error
+      await fetchProducts()
+    } catch (error) {
+      console.error('Update failed:', error)
+    } finally {
+      setUpdatingId(null)
+      setEditingId(null)
+    }
+  }
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this product?')) return
+    
+    setUpdatingId(id)
+    try {
+      const { error } = await supabase
+        .from('products')
+        .delete()
+        .eq('id', id)
+      
+      if (error) throw error
+      await fetchProducts()
+    } catch (error) {
+      console.error('Delete failed:', error)
+    } finally {
+      setUpdatingId(null)
+    }
   }
 
   return (
@@ -58,8 +97,21 @@ const InventoryPage = () => {
             </tr>
           </thead>
           <tbody>
-            {products.map((product) => (
-              <tr key={product.id} style={{ borderTop: '1px solid var(--border)', background: 'transparent' }}>
+            {isLoading && products.length === 0 ? (
+              <tr>
+                <td colSpan={7} style={{ padding: '3rem', textAlign: 'center' }}>
+                  <Loader2 className="animate-spin" style={{ margin: '0 auto' }} />
+                  <p style={{ marginTop: '1rem', color: 'var(--text-muted)', fontSize: '0.8rem' }}>FETCHING INVENTORY...</p>
+                </td>
+              </tr>
+            ) : products.length === 0 ? (
+              <tr>
+                <td colSpan={7} style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+                  No products found in database.
+                </td>
+              </tr>
+            ) : products.map((product) => (
+              <tr key={product.id} style={{ borderTop: '1px solid var(--border)', background: 'transparent', opacity: updatingId === product.id ? 0.5 : 1 }}>
                 <td style={{ padding: '1.25rem 1.5rem', fontWeight: 600 }}>{product.name}</td>
                 <td style={{ padding: '1.25rem 1.5rem' }}>
                   <span style={{ padding: '0.35rem 0.75rem', background: 'rgba(255,255,255,0.05)', borderRadius: '0.5rem', fontSize: '0.7rem', fontWeight: 700 }}>
@@ -73,7 +125,9 @@ const InventoryPage = () => {
                       type="number" 
                       defaultValue={product.sell_price}
                       onBlur={(e) => handlePriceChange(product.id, Number(e.target.value))}
+                      onKeyDown={(e) => e.key === 'Enter' && handlePriceChange(product.id, Number(e.currentTarget.value))}
                       autoFocus
+                      disabled={updatingId === product.id}
                       style={{ 
                         width: '100px', background: 'var(--background)', border: '1px solid rgba(255,255,255,0.3)', 
                         color: 'white', padding: '0.4rem 0.6rem', borderRadius: '0.5rem', outline: 'none'
@@ -99,10 +153,20 @@ const InventoryPage = () => {
                 </td>
                 <td style={{ padding: '1.25rem 1.5rem' }}>
                   <div style={{ display: 'flex', gap: '0.5rem' }}>
-                    <button className="btn-ghost" style={{ padding: '0.5rem', border: 'none' }} onClick={() => setEditingId(product.id)}>
+                    <button 
+                      className="btn-ghost" 
+                      style={{ padding: '0.5rem', border: 'none' }} 
+                      onClick={() => setEditingId(product.id)}
+                      disabled={updatingId === product.id}
+                    >
                       <Edit3 size={18} />
                     </button>
-                    <button className="btn-ghost" style={{ padding: '0.5rem', border: 'none', color: 'var(--error)' }}>
+                    <button 
+                      className="btn-ghost" 
+                      style={{ padding: '0.5rem', border: 'none', color: 'var(--error)' }}
+                      onClick={() => handleDelete(product.id)}
+                      disabled={updatingId === product.id}
+                    >
                       <Trash2 size={18} />
                     </button>
                   </div>

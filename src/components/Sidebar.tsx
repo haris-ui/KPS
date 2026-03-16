@@ -8,6 +8,7 @@ import {
   LogOut 
 } from 'lucide-react'
 import { useStore } from '../store/useStore'
+import { supabase } from '../lib/supabase'
 
 const Sidebar = () => {
   const { setUser } = useStore()
@@ -82,11 +83,11 @@ const Sidebar = () => {
       <div style={{ height: '1px', background: 'rgba(255,255,255,0.06)', marginBottom: '1rem' }} />
       <button 
         className="btn btn-ghost" 
-        onClick={() => setUser(null)}
-        style={{ width: '100%', justifyContent: 'flex-start', border: 'none', color: 'var(--text-muted)' }}
+        onClick={() => supabase.auth.signOut()}
+        style={{ width: '100%', justifyContent: 'flex-start', border: 'none', color: 'var(--error)', background: 'transparent' }}
       >
         <LogOut size={18} />
-        <span style={{ fontSize: '0.875rem' }}>Logout</span>
+        <span style={{ fontSize: '0.875rem' }}>Logout Securely</span>
       </button>
     </div>
   )

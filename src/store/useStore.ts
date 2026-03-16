@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { supabase } from '../lib/supabase'
 
 interface User {
   id: string;
@@ -16,11 +17,35 @@ interface Product {
   stock: number;
 }
 
+interface Client {
+  id: string;
+  name: string;
+  contact: string;
+  balance: number;
+  credit_limit: number;
+}
+
+interface Expense {
+  id: string;
+  category: string;
+  amount: number;
+  date: string;
+  note: string;
+  has_receipt: boolean;
+}
+
 interface AppState {
   user: User | null;
   setUser: (user: User | null) => void;
+  isLoading: boolean;
   products: Product[];
   setProducts: (products: Product[]) => void;
+  fetchProducts: () => Promise<void>;
+  clients: Client[];
+  fetchClients: () => Promise<void>;
+  fetchExpenses: () => Promise<void>;
+  stats: { todaySales: number; clientCount: number; totalReceivables: number };
+  fetchStats: () => Promise<void>;
   cart: { product: Product; quantity: number; processing_charge: number }[];
   addToCart: (product: Product, quantity: number, processing_charge: number) => void;
   removeFromCart: (productId: string) => void;
@@ -30,13 +55,55 @@ interface AppState {
 export const useStore = create<AppState>((set) => ({
   user: null,
   setUser: (user) => set({ user }),
-  products: [
-    { id: '1', name: 'Whole Chicken', category: 'Whole', buy_price: 310, sell_price: 390, unit: 'KG', stock: 50 },
-    { id: '2', name: 'Leg Piece', category: 'Cuts', buy_price: 420, sell_price: 520, unit: 'KG', stock: 30 },
-    { id: '3', name: 'Boneless Breast', category: 'Boneless', buy_price: 540, sell_price: 680, unit: 'KG', stock: 25 },
-    { id: '4', name: 'Chicken Liver', category: 'Offal', buy_price: 185, sell_price: 250, unit: 'KG', stock: 15 },
-  ],
+  isLoading: false,
+  products: [],
   setProducts: (products) => set({ products }),
+  fetchProducts: async () => {
+    set({ isLoading: true })
+    const { data, error } = await supabase.from('products').select('*').order('name')
+    if (error) console.error('Error fetching products:', error)
+    else set({ products: data || [] })
+    set({ isLoading: false })
+  },
+  clients: [],
+  fetchClients: async () => {
+    set({ isLoading: true })
+    const { data, error } = await supabase.from('clients').select('*').order('name')
+    if (error) console.error('Error fetching clients:', error)
+    else set({ clients: data || [] })
+    set({ isLoading: false })
+  },
+  expenses: [],
+  fetchExpenses: async () => {
+    set({ isLoading: true })
+    const { data, error } = await supabase.from('expenses').select('*').order('date', { ascending: false })
+    if (error) console.error('Error fetching expenses:', error)
+    else set({ expenses: data || [] })
+    set({ isLoading: false })
+  },
+  stats: { todaySales: 0, clientCount: 0, totalReceivables: 0 },
+  fetchStats: async () => {
+    const today = new Date().toISOString().split('T')[0]
+    
+    // Fetch today's sales
+    const { data: sales } = await supabase
+      .from('sales')
+      .select('total_amount')
+      .gte('created_at', today)
+    
+    // Fetch client stats
+    const { data: clients } = await supabase
+      .from('clients')
+      .select('balance')
+
+    set({
+      stats: {
+        todaySales: sales?.reduce((acc, s) => acc + s.total_amount, 0) || 0,
+        clientCount: clients?.length || 0,
+        totalReceivables: clients?.reduce((acc, c) => acc + (c.balance < 0 ? Math.abs(c.balance) : 0), 0) || 0
+      }
+    })
+  },
   cart: [],
   addToCart: (product, quantity, processing_charge) => 
     set((state) => ({ 
