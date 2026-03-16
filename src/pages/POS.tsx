@@ -83,7 +83,33 @@ const POSPage = () => {
   }
 
   return (
-    <div className="pos-page" style={{ display: 'grid', gridTemplateColumns: '1fr 400px', gap: '2rem', height: 'calc(100vh - 100px)' }}>
+    <div className="pos-page" style={{ 
+      display: 'grid', 
+      gridTemplateColumns: '1fr 400px', 
+      gap: '2rem', 
+      height: 'calc(100vh - 100px)',
+      position: 'relative'
+    }}>
+      <style dangerouslySetInnerHTML={{ __html: `
+        @media (max-width: 1200px) {
+          .pos-page { grid-template-columns: 1fr 320px !important; }
+        }
+        @media (max-width: 768px) {
+          .pos-page { 
+            grid-template-columns: 1fr !important; 
+            height: auto !important;
+            padding-bottom: 2rem;
+          }
+          .pos-page > div:last-child {
+            position: sticky;
+            bottom: 0;
+            z-index: 50;
+            height: auto !important;
+            max-height: 80vh;
+            box-shadow: 0 -10px 40px rgba(0,0,0,0.5) !important;
+          }
+        }
+      `}} />
       {/* Left: Product Selection */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
         <div className="glass-card" style={{ padding: '1rem' }}>

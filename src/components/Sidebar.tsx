@@ -9,7 +9,7 @@ import {
 } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 
-const Sidebar = () => {
+const Sidebar = ({ onClose }: { onClose?: () => void }) => {
 
   const navItems = [
     { icon: <LayoutDashboard size={20} />, label: 'Dashboard', path: '/' },
@@ -30,7 +30,8 @@ const Sidebar = () => {
       left: 0,
       top: 0,
       borderRight: '1px solid rgba(255,255,255,0.06)',
-      animation: 'slideInLeft 0.4s cubic-bezier(0.22, 1, 0.36, 1) both'
+      animation: 'slideInLeft 0.4s cubic-bezier(0.22, 1, 0.36, 1) both',
+      zIndex: 1000
     }}>
       <div style={{ marginBottom: '2.5rem', padding: '0 0.5rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
         <div style={{ 
@@ -51,6 +52,7 @@ const Sidebar = () => {
           <NavLink
             key={item.path}
             to={item.path}
+            onClick={onClose}
             className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
             style={({ isActive }) => ({
               display: 'flex',
@@ -81,7 +83,10 @@ const Sidebar = () => {
       <div style={{ height: '1px', background: 'rgba(255,255,255,0.06)', marginBottom: '1rem' }} />
       <button 
         className="btn btn-ghost" 
-        onClick={() => supabase.auth.signOut()}
+        onClick={() => {
+          supabase.auth.signOut()
+          onClose?.()
+        }}
         style={{ width: '100%', justifyContent: 'flex-start', border: 'none', color: 'var(--error)', background: 'transparent' }}
       >
         <LogOut size={18} />

@@ -49,8 +49,8 @@ const ExpensesPage = () => {
 
   return (
     <div className="expenses-page">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>
-        <h2 style={{ fontSize: '1.75rem', letterSpacing: '-0.02em' }}>Expense Log</h2>
+      <div className="page-header">
+        <h2>Expense Log</h2>
         <button className="btn btn-primary" onClick={() => setShowAddModal(true)}>
           <Plus size={20} />
           LOG EXPENSE
