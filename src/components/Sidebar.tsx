@@ -7,11 +7,9 @@ import {
   Receipt, 
   LogOut 
 } from 'lucide-react'
-import { useStore } from '../store/useStore'
 import { supabase } from '../lib/supabase'
 
 const Sidebar = () => {
-  const { setUser } = useStore()
 
   const navItems = [
     { icon: <LayoutDashboard size={20} />, label: 'Dashboard', path: '/' },

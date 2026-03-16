@@ -43,6 +43,7 @@ interface AppState {
   fetchProducts: () => Promise<void>;
   clients: Client[];
   fetchClients: () => Promise<void>;
+  expenses: Expense[];
   fetchExpenses: () => Promise<void>;
   stats: { todaySales: number; clientCount: number; totalReceivables: number };
   fetchStats: () => Promise<void>;
