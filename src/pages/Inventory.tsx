@@ -1,16 +1,45 @@
 import { useState, useEffect } from 'react'
 import { useStore } from '../store/useStore'
 import { supabase } from '../lib/supabase'
-import { Edit3, Trash2, TrendingUp, AlertCircle, Plus, Loader2 } from 'lucide-react'
+import { Edit3, Trash2, TrendingUp, AlertCircle, Plus, Loader2, X } from 'lucide-react'
 
 const InventoryPage = () => {
   const { products, fetchProducts, isLoading } = useStore()
   const [editingId, setEditingId] = useState<string | null>(null)
   const [updatingId, setUpdatingId] = useState<string | null>(null)
+  const [showAddModal, setShowAddModal] = useState(false)
+  const [newProduct, setNewProduct] = useState({
+    name: '',
+    category: 'Poultry',
+    buy_price: 0,
+    sell_price: 0,
+    unit: 'KG' as 'KG' | 'Piece',
+    stock: 0
+  })
 
   useEffect(() => {
     fetchProducts()
   }, [])
+
+  const handleAddProduct = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setUpdatingId('adding')
+    try {
+      const { error } = await supabase
+        .from('products')
+        .insert([newProduct])
+      
+      if (error) throw error
+      await fetchProducts()
+      setShowAddModal(false)
+      setNewProduct({ name: '', category: 'Poultry', buy_price: 0, sell_price: 0, unit: 'KG', stock: 0 })
+    } catch (error) {
+      console.error('Adding product failed:', error)
+      alert('Failed to add product')
+    } finally {
+      setUpdatingId(null)
+    }
+  }
 
   const stockValue = products.reduce((acc, p) => acc + p.buy_price * p.stock, 0)
   const lowStockCount = products.filter(p => p.stock < 20).length
@@ -56,7 +85,7 @@ const InventoryPage = () => {
     <div className="inventory-page">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>
         <h2 style={{ fontSize: '1.75rem', letterSpacing: '-0.02em' }}>Inventory Management</h2>
-        <button className="btn btn-primary">
+        <button className="btn btn-primary" onClick={() => setShowAddModal(true)}>
           <Plus size={20} />
           ADD PRODUCT
         </button>
@@ -176,6 +205,102 @@ const InventoryPage = () => {
           </tbody>
         </table>
       </div>
+
+    {showAddModal && (
+        <div style={{ 
+          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', zIndex: 1000,
+          display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(10px)'
+        }}>
+          <div className="glass-card" style={{ width: '100%', maxWidth: '450px', position: 'relative', animation: 'scaleIn 0.3s ease' }}>
+            <button 
+              onClick={() => setShowAddModal(false)}
+              style={{ position: 'absolute', right: '1.5rem', top: '1.5rem', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}
+            >
+              <X size={24} />
+            </button>
+            <h3 style={{ marginBottom: '2rem', fontSize: '1.5rem' }}>Add New Product</h3>
+            
+            <form onSubmit={handleAddProduct} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.5rem', textTransform: 'uppercase' }}>Product Name</label>
+                <input 
+                  type="text" required
+                  value={newProduct.name}
+                  onChange={e => setNewProduct({...newProduct, name: e.target.value})}
+                  style={{ width: '100%', background: 'var(--surface)', border: '1px solid var(--border)', color: 'white', padding: '0.75rem', borderRadius: '0.75rem' }}
+                />
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.5rem', textTransform: 'uppercase' }}>Category</label>
+                  <select 
+                    value={newProduct.category}
+                    onChange={e => setNewProduct({...newProduct, category: e.target.value})}
+                    style={{ width: '100%', background: 'var(--surface)', border: '1px solid var(--border)', color: 'white', padding: '0.75rem', borderRadius: '0.75rem' }}
+                  >
+                    <option>Poultry</option>
+                    <option>Supplies</option>
+                    <option>Equipment</option>
+                    <option>Other</option>
+                  </select>
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.5rem', textTransform: 'uppercase' }}>Unit</label>
+                  <select 
+                    value={newProduct.unit}
+                    onChange={e => setNewProduct({...newProduct, unit: e.target.value as 'KG' | 'Piece'})}
+                    style={{ width: '100%', background: 'var(--surface)', border: '1px solid var(--border)', color: 'white', padding: '0.75rem', borderRadius: '0.75rem' }}
+                  >
+                    <option value="KG">Kilogram (KG)</option>
+                    <option value="Piece">Piece</option>
+                  </select>
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.5rem', textTransform: 'uppercase' }}>Buy Price (Rs.)</label>
+                  <input 
+                    type="number" required min="0"
+                    value={newProduct.buy_price}
+                    onChange={e => setNewProduct({...newProduct, buy_price: Number(e.target.value)})}
+                    style={{ width: '100%', background: 'var(--surface)', border: '1px solid var(--border)', color: 'white', padding: '0.75rem', borderRadius: '0.75rem' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.5rem', textTransform: 'uppercase' }}>Sell Price (Rs.)</label>
+                  <input 
+                    type="number" required min="0"
+                    value={newProduct.sell_price}
+                    onChange={e => setNewProduct({...newProduct, sell_price: Number(e.target.value)})}
+                    style={{ width: '100%', background: 'var(--surface)', border: '1px solid var(--border)', color: 'white', padding: '0.75rem', borderRadius: '0.75rem' }}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.5rem', textTransform: 'uppercase' }}>Initial Stock</label>
+                <input 
+                  type="number" required min="0"
+                  value={newProduct.stock}
+                  onChange={e => setNewProduct({...newProduct, stock: Number(e.target.value)})}
+                  style={{ width: '100%', background: 'var(--surface)', border: '1px solid var(--border)', color: 'white', padding: '0.75rem', borderRadius: '0.75rem' }}
+                />
+              </div>
+
+              <button 
+                type="submit" 
+                className="btn btn-primary" 
+                disabled={updatingId === 'adding'}
+                style={{ height: '3.5rem', marginTop: '1rem' }}
+              >
+                {updatingId === 'adding' ? <Loader2 className="animate-spin" /> : 'REGISTER PRODUCT'}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

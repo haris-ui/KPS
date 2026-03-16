@@ -1,14 +1,43 @@
 import { useState, useEffect } from 'react'
 import { useStore } from '../store/useStore'
-import { Plus, Search, TrendingDown, TrendingUp, History, Wallet, Loader2 } from 'lucide-react'
+import { Plus, Search, TrendingDown, TrendingUp, History, Wallet, Loader2, X } from 'lucide-react'
+import { supabase } from '../lib/supabase'
 
 const ClientsPage = () => {
   const { clients, fetchClients, isLoading } = useStore()
   const [searchTerm, setSearchTerm] = useState('')
+  const [showAddModal, setShowAddModal] = useState(false)
+  const [isAdding, setIsAdding] = useState(false)
+  const [newClient, setNewClient] = useState({
+    name: '',
+    contact: '',
+    balance: 0,
+    credit_limit: 50000
+  })
 
   useEffect(() => {
     fetchClients()
   }, [])
+
+  const handleAddClient = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setIsAdding(true)
+    try {
+      const { error } = await supabase
+        .from('clients')
+        .insert([newClient])
+      
+      if (error) throw error
+      await fetchClients()
+      setShowAddModal(false)
+      setNewClient({ name: '', contact: '', balance: 0, credit_limit: 50000 })
+    } catch (error) {
+      console.error('Adding client failed:', error)
+      alert('Failed to add client')
+    } finally {
+      setIsAdding(false)
+    }
+  }
 
   const totalReceivables = clients.reduce((acc, c) => acc + (c.balance < 0 ? Math.abs(c.balance) : 0), 0)
   const totalCredits = clients.reduce((acc, c) => acc + (c.balance > 0 ? c.balance : 0), 0)
@@ -21,7 +50,7 @@ const ClientsPage = () => {
     <div className="clients-page">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>
         <h2 style={{ fontSize: '1.75rem', letterSpacing: '-0.02em' }}>B2B Client Management</h2>
-        <button className="btn btn-primary">
+        <button className="btn btn-primary" onClick={() => setShowAddModal(true)}>
           <Plus size={20} />
           NEW CLIENT
         </button>
@@ -129,6 +158,78 @@ const ClientsPage = () => {
           </div>
         ))}
       </div>
+
+    {showAddModal && (
+        <div style={{ 
+          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', zIndex: 1000,
+          display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(10px)'
+        }}>
+          <div className="glass-card" style={{ width: '100%', maxWidth: '450px', position: 'relative', animation: 'scaleIn 0.3s ease' }}>
+            <button 
+              onClick={() => setShowAddModal(false)}
+              style={{ position: 'absolute', right: '1.5rem', top: '1.5rem', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}
+            >
+              <X size={24} />
+            </button>
+            <h3 style={{ marginBottom: '2rem', fontSize: '1.5rem' }}>Register New Partner</h3>
+            
+            <form onSubmit={handleAddClient} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.5rem', textTransform: 'uppercase' }}>Client/Business Name</label>
+                <input 
+                  type="text" required
+                  value={newClient.name}
+                  onChange={e => setNewClient({...newClient, name: e.target.value})}
+                  placeholder="e.g. Grand Hyatt Hotel"
+                  style={{ width: '100%', background: 'var(--surface)', border: '1px solid var(--border)', color: 'white', padding: '0.75rem', borderRadius: '0.75rem' }}
+                />
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.5rem', textTransform: 'uppercase' }}>Contact Details</label>
+                <input 
+                  type="text" required
+                  value={newClient.contact}
+                  onChange={e => setNewClient({...newClient, contact: e.target.value})}
+                  placeholder="+92 300 1234567"
+                  style={{ width: '100%', background: 'var(--surface)', border: '1px solid var(--border)', color: 'white', padding: '0.75rem', borderRadius: '0.75rem' }}
+                />
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.5rem', textTransform: 'uppercase' }}>Initial Balance</label>
+                  <input 
+                    type="number" required
+                    value={newClient.balance}
+                    onChange={e => setNewClient({...newClient, balance: Number(e.target.value)})}
+                    style={{ width: '100%', background: 'var(--surface)', border: '1px solid var(--border)', color: 'white', padding: '0.75rem', borderRadius: '0.75rem' }}
+                  />
+                  <p style={{ fontSize: '0.6rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>Use negative for existing debt</p>
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.5rem', textTransform: 'uppercase' }}>Credit Limit</label>
+                  <input 
+                    type="number" required min="0"
+                    value={newClient.credit_limit}
+                    onChange={e => setNewClient({...newClient, credit_limit: Number(e.target.value)})}
+                    style={{ width: '100%', background: 'var(--surface)', border: '1px solid var(--border)', color: 'white', padding: '0.75rem', borderRadius: '0.75rem' }}
+                  />
+                </div>
+              </div>
+
+              <button 
+                type="submit" 
+                className="btn btn-primary" 
+                disabled={isAdding}
+                style={{ height: '3.5rem', marginTop: '1rem' }}
+              >
+                {isAdding ? <Loader2 className="animate-spin" /> : 'CREATE CLIENT PROFILE'}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

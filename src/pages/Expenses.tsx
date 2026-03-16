@@ -1,13 +1,49 @@
-import { useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { useStore } from '../store/useStore'
-import { Plus, Receipt, Banknote, Tag, Calendar, Camera, Edit3, Loader2 } from 'lucide-react'
+import { Plus, Receipt, Banknote, Tag, Calendar, Camera, Edit3, Loader2, X } from 'lucide-react'
+import { supabase } from '../lib/supabase'
 
 const ExpensesPage = () => {
   const { expenses, fetchExpenses, isLoading } = useStore()
+  const [showAddModal, setShowAddModal] = useState(false)
+  const [isAdding, setIsAdding] = useState(false)
+  const [newExpense, setNewExpense] = useState({
+    category: 'Utilities',
+    amount: 0,
+    date: new Date().toISOString().split('T')[0],
+    note: '',
+    has_receipt: false
+  })
 
   useEffect(() => {
     fetchExpenses()
   }, [])
+
+  const handleAddExpense = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setIsAdding(true)
+    try {
+      const { error } = await supabase
+        .from('expenses')
+        .insert([newExpense])
+      
+      if (error) throw error
+      await fetchExpenses()
+      setShowAddModal(false)
+      setNewExpense({
+        category: 'Utilities',
+        amount: 0,
+        date: new Date().toISOString().split('T')[0],
+        note: '',
+        has_receipt: false
+      })
+    } catch (error) {
+      console.error('Adding expense failed:', error)
+      alert('Failed to log expense')
+    } finally {
+      setIsAdding(false)
+    }
+  }
 
   const totalExpenses = expenses.reduce((acc, e) => acc + e.amount, 0)
 
@@ -15,7 +51,7 @@ const ExpensesPage = () => {
     <div className="expenses-page">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>
         <h2 style={{ fontSize: '1.75rem', letterSpacing: '-0.02em' }}>Expense Log</h2>
-        <button className="btn btn-primary">
+        <button className="btn btn-primary" onClick={() => setShowAddModal(true)}>
           <Plus size={20} />
           LOG EXPENSE
         </button>
@@ -108,6 +144,93 @@ const ExpensesPage = () => {
           </tbody>
         </table>
       </div>
+
+    {showAddModal && (
+        <div style={{ 
+          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', zIndex: 1000,
+          display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(10px)'
+        }}>
+          <div className="glass-card" style={{ width: '100%', maxWidth: '450px', position: 'relative', animation: 'scaleIn 0.3s ease' }}>
+            <button 
+              onClick={() => setShowAddModal(false)}
+              style={{ position: 'absolute', right: '1.5rem', top: '1.5rem', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}
+            >
+              <X size={24} />
+            </button>
+            <h3 style={{ marginBottom: '2rem', fontSize: '1.5rem' }}>Log Business Expense</h3>
+            
+            <form onSubmit={handleAddExpense} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.5rem', textTransform: 'uppercase' }}>Category</label>
+                  <select 
+                    value={newExpense.category}
+                    onChange={e => setNewExpense({...newExpense, category: e.target.value})}
+                    style={{ width: '100%', background: 'var(--surface)', border: '1px solid var(--border)', color: 'white', padding: '0.75rem', borderRadius: '0.75rem' }}
+                  >
+                    <option>Utilities</option>
+                    <option>Labor</option>
+                    <option>Transport</option>
+                    <option>Rent</option>
+                    <option>Feed</option>
+                    <option>Medical</option>
+                    <option>Other</option>
+                  </select>
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.5rem', textTransform: 'uppercase' }}>Date</label>
+                  <input 
+                    type="date" required
+                    value={newExpense.date}
+                    onChange={e => setNewExpense({...newExpense, date: e.target.value})}
+                    style={{ width: '100%', background: 'var(--surface)', border: '1px solid var(--border)', color: 'white', padding: '0.75rem', borderRadius: '0.75rem' }}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.5rem', textTransform: 'uppercase' }}>Amount (Rs.)</label>
+                <input 
+                  type="number" required min="0"
+                  value={newExpense.amount}
+                  onChange={e => setNewExpense({...newExpense, amount: Number(e.target.value)})}
+                  style={{ width: '100%', background: 'var(--surface)', border: '1px solid var(--border)', color: 'white', padding: '0.75rem', borderRadius: '0.75rem' }}
+                />
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.5rem', textTransform: 'uppercase' }}>Description / Note</label>
+                <textarea 
+                  value={newExpense.note}
+                  onChange={e => setNewExpense({...newExpense, note: e.target.value})}
+                  rows={3}
+                  placeholder="What was this expense for?"
+                  style={{ width: '100%', background: 'var(--surface)', border: '1px solid var(--border)', color: 'white', padding: '0.75rem', borderRadius: '0.75rem', resize: 'none' }}
+                />
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.5rem 0' }}>
+                <input 
+                  type="checkbox" 
+                  id="has_receipt"
+                  checked={newExpense.has_receipt}
+                  onChange={e => setNewExpense({...newExpense, has_receipt: e.target.checked})}
+                />
+                <label htmlFor="has_receipt" style={{ fontSize: '0.85rem', cursor: 'pointer' }}>Receipt Available</label>
+              </div>
+
+              <button 
+                type="submit" 
+                className="btn btn-primary" 
+                disabled={isAdding}
+                style={{ height: '3.5rem', marginTop: '1rem' }}
+              >
+                {isAdding ? <Loader2 className="animate-spin" /> : 'CONFIRM EXPENSE'}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
