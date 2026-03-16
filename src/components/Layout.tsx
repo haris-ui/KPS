@@ -1,47 +1,39 @@
-import { useState, type ReactNode } from 'react'
+import React, { useState } from 'react'
 import Sidebar from './Sidebar'
-import { Menu, X } from 'lucide-react'
+import { Menu, X, Store } from 'lucide-react'
 
 interface LayoutProps {
-  children: ReactNode;
+  children: React.ReactNode
 }
 
 const Layout = ({ children }: LayoutProps) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
 
   return (
-    <div className="layout-root">
-      {/* Mobile Header */}
-      <div className="mobile-header">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQR6R1ZiuxJXP-tMuvdgKWoZIhPBDqyyWuhHQ&s" alt="Logo" style={{ width: '32px', height: '32px', borderRadius: '2px' }} />
-          <h2 style={{ fontSize: '1rem', fontWeight: 800, letterSpacing: '-0.02em', textTransform: 'uppercase' }}>Kashif Poultry</h2>
-        </div>
-        <button 
-          onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-          className="btn-ghost"
-          style={{ padding: '0.4rem', border: 'none' }}
-        >
-          {isSidebarOpen ? <X size={24} /> : <Menu size={24} />}
-        </button>
-      </div>
+    <div className="app-container">
+      <Sidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
+      
+      <main style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: '100vh', width: '100%' }}>
+        {/* Mobile Header */}
+        <header className="mobile-header">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <div style={{ background: 'var(--accent)', padding: '0.4rem', borderRadius: '6px', display: 'flex' }}>
+              <Store size={18} color="white" />
+            </div>
+            <span style={{ fontWeight: 800, letterSpacing: '0.05em' }}>KPS</span>
+          </div>
+          <button 
+            className="btn" 
+            style={{ padding: '0.5rem', width: 'auto', border: 'none', background: 'transparent', color: 'var(--text-primary)' }}
+            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+          >
+            {isSidebarOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
+        </header>
 
-      {/* Mobile Overlay */}
-      {isSidebarOpen && (
-        <div 
-          onClick={() => setIsSidebarOpen(false)}
-          style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', zIndex: 140 }}
-        />
-      )}
-
-      {/* Sidebar Container */}
-      <div className={`layout-sidebar ${isSidebarOpen ? 'open' : ''}`}>
-        <Sidebar onClose={() => setIsSidebarOpen(false)} />
-      </div>
-
-      {/* Main Content */}
-      <main className="layout-main">
-        {children}
+        <section className="main-content">
+          {children}
+        </section>
       </main>
     </div>
   )

@@ -227,40 +227,35 @@ const InventoryPage = () => {
                   >
                     <option>Poultry</option>
                     <option>Supplies</option>
-                    <option>Equipment</option>
-                    <option>Other</option>
+                    <option>Feed</option>
                   </select>
                 </div>
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.65rem', color: 'var(--text-secondary)', marginBottom: '0.5rem', textTransform: 'uppercase', fontWeight: 700 }}>Unit</label>
-                  <select 
-                    value={newProduct.unit}
-                    onChange={e => setNewProduct({...newProduct, unit: e.target.value as 'KG' | 'Piece'})}
-                    className="input"
-                  >
-                    <option value="KG">KG</option>
-                    <option value="Piece">PIECE</option>
+                <div className="input-group">
+                  <label className="input-label">Unit</label>
+                  <select className="input" value={newProduct.unit} onChange={e => setNewProduct({...newProduct, unit: e.target.value as any})}>
+                    <option>KG</option>
+                    <option>Piece</option>
                   </select>
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.65rem', color: 'var(--text-secondary)', marginBottom: '0.5rem', textTransform: 'uppercase', fontWeight: 700 }}>Cost Rate</label>
-                  <input type="number" required min="0" value={newProduct.buy_price} onChange={e => setNewProduct({...newProduct, buy_price: Number(e.target.value)})} className="input" />
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                <div className="input-group">
+                  <label className="input-label">Purchase Price</label>
+                  <input type="number" required value={newProduct.buy_price} onChange={e => setNewProduct({...newProduct, buy_price: Number(e.target.value)})} className="input" />
                 </div>
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.65rem', color: 'var(--text-secondary)', marginBottom: '0.5rem', textTransform: 'uppercase', fontWeight: 700 }}>Sale Rate</label>
-                  <input type="number" required min="0" value={newProduct.sell_price} onChange={e => setNewProduct({...newProduct, sell_price: Number(e.target.value)})} className="input" />
+                <div className="input-group">
+                  <label className="input-label">Sale Price</label>
+                  <input type="number" required value={newProduct.sell_price} onChange={e => setNewProduct({...newProduct, sell_price: Number(e.target.value)})} className="input" />
                 </div>
               </div>
 
-              <div>
-                <label style={{ display: 'block', fontSize: '0.65rem', color: 'var(--text-secondary)', marginBottom: '0.5rem', textTransform: 'uppercase', fontWeight: 700 }}>Opening Stock</label>
+              <div className="input-group">
+                <label className="input-label">Initial Stock Level</label>
                 <input type="number" required min="0" value={newProduct.stock} onChange={e => setNewProduct({...newProduct, stock: Number(e.target.value)})} className="input" />
               </div>
 
-              <button type="submit" className="btn btn-primary" style={{ height: '4rem', marginTop: '1rem' }}>
+              <button type="submit" className="btn btn-primary" style={{ height: '3.5rem', marginTop: '1rem' }}>
                 {updatingId === 'adding' ? <Loader2 className="animate-spin" /> : 'REGISTER INVENTORY'}
               </button>
             </form>
